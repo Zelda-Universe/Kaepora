@@ -4,6 +4,7 @@ using NLog;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using System;
 
 namespace Kaepora
 {
@@ -25,9 +26,13 @@ namespace Kaepora
 
             _commandService = new CommandService(new CommandServiceConfig()
             {
-                DefaultRunMode = RunMode.Async,
+                DefaultRunMode = RunMode.Sync,
                 CaseSensitiveCommands = false
             });
+
+            _commandService.AddTypeReader<DateTime>(new DateTypeReader());
+            _commandService.AddTypeReader<Segment>(new SegmentTypeReader(_dependencyMap));
+            _commandService.AddTypeReader<Profile>(new ProfileTypeReader(_dependencyMap));
 
             HelpService.RegisterCommandService(_commandService);
 
@@ -56,13 +61,15 @@ namespace Kaepora
 
             var context = new SocketCommandContext(_client, msg);
 
-            var result = await _commandService.ExecuteAsync(context, argPos, _dependencyMap, MultiMatchHandling.Best);
-
             _logger.Info($"Command ran by {context.User} in {context.Channel.Name} - {context.Message.Content}");
 
-            if (result.IsSuccess)
-                return;
+            var result = await _commandService.ExecuteAsync(context, argPos, _dependencyMap, MultiMatchHandling.Best);
 
+            if (result.IsSuccess)
+            {
+                await _dependencyMap.Get<WelcomeDbContext>().SaveChangesAsync();
+                return;
+            }
 
             string response = null;
 
@@ -72,10 +79,10 @@ namespace Kaepora
                     response = $":warning: There was an error parsing your command: `{parseResult.ErrorReason}`";
                     break;
                 case PreconditionResult preconditionResult:
-                    response = $":warning: A precondition of your command failed: `{preconditionResult.ErrorReason}`";
+                    response = $":warning: A prerequisite of your command failed: `{preconditionResult.ErrorReason}`";
                     break;
                 case ExecuteResult executeResult:
-                    response = $":warning: Your command failed to execute. If this persists, contact the Bot Developer.\n`{executeResult.Exception.Message}`";
+                    response = $":warning: Your command failed to execute. If this persists, contact a Discord Host.\n`{executeResult.Exception.Message}`";
                     _logger.Error(executeResult.Exception);
                     break;
             }

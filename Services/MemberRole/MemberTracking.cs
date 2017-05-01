@@ -39,8 +39,7 @@ namespace Kaepora
             if (user is null || user.Guild.Id != 207233454671265793 || user.Roles.Count > 1)
                 return;
 
-            if (_memberRole == null)
-                _memberRole = Client.GetGuild(207233454671265793).GetRole(308586794616881152);
+            EnsureRole();
 
             using (var db = new MemberTrackingContext())
             {
@@ -65,6 +64,14 @@ namespace Kaepora
 
                 bool tenMessagesHour() => db.Messages.Count(x => x.UserId == user.Id && x.Timestamp.AddHours(1) <= DateTime.UtcNow) >= 10;
             }
+        }
+
+        public SocketRole EnsureRole()
+        {
+            if (_memberRole == null)
+                _memberRole = Client.GetGuild(207233454671265793).GetRole(308586794616881152);
+
+            return _memberRole;
         }
     }
 }

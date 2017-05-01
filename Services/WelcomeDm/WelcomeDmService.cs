@@ -28,12 +28,6 @@ namespace Kaepora
             _assetsDir = Path.Combine(Directory.GetCurrentDirectory(), "Assets");
         }
 
-        protected override Task PreDisable()
-        {
-            Client.UserJoined -= WelcomeUser;
-            return Task.CompletedTask;
-        }
-
         protected override Task PreEnable()
         {
             Client.UserJoined += WelcomeUser;
@@ -42,6 +36,12 @@ namespace Kaepora
             return Task.CompletedTask;
         }
 
+        protected override Task PreDisable()
+        {
+            Client.UserJoined -= WelcomeUser;
+            return Task.CompletedTask;
+        }
+        
         public void ReloadCurrentWelcome()
         {
             _welcomeMessage = GetProfileForDate().ToString();

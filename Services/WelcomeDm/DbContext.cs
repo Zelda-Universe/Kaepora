@@ -12,6 +12,7 @@ namespace Kaepora
     {
         public DbSet<Segment> Segments { get; set; }
         public DbSet<Profile> Profiles { get; set; }
+        public DbSet<ProfileSegment> Glue { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder builder)
         {

@@ -10,7 +10,7 @@ namespace Kaepora
         public int Priority { get; set; }
         public string Content { get; set; }
         public bool IsActive { get; set; } = true;
-        public List<Profile> Profiles { get; set; } = new List<Profile>();
+        public List<ProfileSegment> Profiles { get; set; } = new List<ProfileSegment>();
     }
 
     public class Profile
@@ -18,15 +18,21 @@ namespace Kaepora
         public string Key { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
-        public List<Segment> Segments { get; set; } = new List<Segment>();
+        public List<ProfileSegment> Segments { get; set; } = new List<ProfileSegment>();
 
         public override string ToString()
         {
-            var segments = Segments.Where(x => x.IsActive)
+            var segments = Segments.Select(x => x.Segment).Where(x => x.IsActive)
                                     .OrderByDescending(x => x.Priority)
                                     .Select(x => x.Content);
 
             return String.Join("\n\n", segments);
         }
+    }
+
+    public class ProfileSegment
+    {
+        public Segment Segment { get; set; }
+        public Profile Profile { get; set; }
     }
 }

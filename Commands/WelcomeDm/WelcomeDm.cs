@@ -145,26 +145,26 @@ namespace Kaepora
             [Command("add seg"), Name("Add Segment")]
             public async Task AddTo(Profile stage, Segment segment)
             {
-                if (stage.Segments.Any(x => x.Key == segment.Key))
+                if (stage.Segments.Any(x => x.Segment.Key == segment.Key))
                 {
                     await ReplyAsync($":warning: Stage `{stage.Key}` already contains Segment `{segment.Key}`");
                     return;
                 }
 
-                stage.Segments.Add(segment);
+                stage.Segments.Add(new ProfileSegment() { Segment = segment, Profile = stage });
                 await Context.Message.AddReactionAsync(thumbsUpUnicode);
             }
 
             [Command("rem seg"), Name("Remove Segment")]
             public async Task RemoveFrom(Profile stage, Segment segment)
             {
-                if (!stage.Segments.Any(x => x.Key == segment.Key))
+                if (!stage.Segments.Any(x => x.Segment.Key == segment.Key))
                 {
                     await ReplyAsync($":warning: Stage `{stage.Key}` doesn't contain Segment `{segment.Key}`");
                     return;
                 }
 
-                stage.Segments.Remove(segment);
+                stage.Segments.Remove(stage.Segments.FirstOrDefault(x => x.Segment.Key == segment.Key));
                 await Context.Message.AddReactionAsync(thumbsUpUnicode);
             }
 
